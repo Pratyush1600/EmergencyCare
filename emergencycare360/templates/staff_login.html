@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block title %}{% if tab == 'register' %}Create Staff Account{% else %}Staff Sign In{% endif %} · EmergencyCare 360{% endblock %}
+{% block page %}login{% endblock %}
+{% block body %}
+<div class="auth-wrap">
+  <section class="auth-side">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+      <b class="fs-5 text-white">EmergencyCare 360</b>
+    </div>
+    <span class="badge bg-white-subtle text-white border border-white-subtle px-3 py-1 mb-3">
+      <i class="bi bi-hospital me-1"></i> Authorized Hospital Portal
+    </span>
+    <h1 class="display-6 fw-bold">Emergency coordination, in one clear view.</h1>
+    <p class="lead" style="color:#c9d9ea;max-width:34rem">
+      Review registrations, set clinical priority, update status, and manage beds. Every clinical action is securely recorded in the audit trail.
+    </p>
+    <div class="p-3 rounded-3 mt-4" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); max-width: 32rem;">
+      <h6 class="text-white mb-2"><i class="bi bi-info-circle me-1 text-teal"></i> Staff Roles &amp; Permissions:</h6>
+      <ul class="small list-unstyled mb-0" style="color:#cfe2f3">
+        <li class="mb-1"><strong class="text-white">🩺 Clinician / Doctor:</strong> Can set clinical priority (Immediate, Urgent, Standard), assign departments, and review case handover snapshots.</li>
+        <li><strong class="text-white">👩‍⚕️ Nurse:</strong> Can record vital signs, allocate patient beds, update status, and track resource availability.</li>
+      </ul>
+    </div>
+    <p class="mt-4 small" style="color:#9fb5cf">
+      <i class="bi bi-shield-check me-1"></i> Software organizes information only. Clinical decisions remain with authenticated medical staff.
+    </p>
+  </section>
+
+  <section class="auth-form">
+    <main id="main" class="w-100" style="max-width:440px">
+      <!-- Tabs for Sign In vs Create Account -->
+      <div class="d-flex p-1 bg-light rounded-3 mb-4 border" role="tablist">
+        <button type="button" class="btn btn-sm flex-fill py-2 fw-bold {% if tab != 'register' %}btn-white shadow-sm text-navy{% else %}text-muted{% endif %}" id="btnTabLogin">
+          <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+        </button>
+        <button type="button" class="btn btn-sm flex-fill py-2 fw-bold {% if tab == 'register' %}btn-white shadow-sm text-navy{% else %}text-muted{% endif %}" id="btnTabRegister">
+          <i class="bi bi-person-plus-fill me-1"></i> Create Account
+        </button>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+        <div>{{ error }}</div>
+      </div>
+      {% endif %}
+
+      <!-- SIGN IN FORM -->
+      <div id="sectionLogin" class="{% if tab == 'register' %}d-none{% endif %}">
+        <h2 class="h4 mb-1">Staff Sign In</h2>
+        <p class="text-muted small mb-4">Enter your credentials to access the emergency coordination dashboard.</p>
+
+        <form method="post" action="{{ url_for('staff_login') }}" id="loginForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+          <div class="mb-3">
+            <label class="form-label" for="login_user">Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+              <input class="form-control" id="login_user" name="username" autocomplete="username" placeholder="e.g. dr.demo" required autofocus>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="login_pw">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+              <input class="form-control" id="login_pw" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+              <button class="btn btn-outline-secondary" type="button" id="btnToggleLoginPw" title="Show/Hide Password">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button class="btn btn-primary w-100 btn-lg mb-3" type="submit">
+            <i class="bi bi-box-arrow-in-right me-2"></i> Sign In to Dashboard
+          </button>
+
+          <!-- Quick Autofill for Demo Testing -->
+          <div class="p-3 bg-light border rounded-3 text-center mb-3">
+            <small class="text-muted d-block mb-2 fw-semibold">Quick-fill Demo Credentials:</small>
+            <div class="d-flex justify-content-center gap-2">
+              <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 demo-fill-btn" data-user="dr.demo" data-pw="EmergencyCare2026!">
+                🩺 Dr. Demo (Doctor)
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 demo-fill-btn" data-user="nurse.demo" data-pw="EmergencyCare2026!">
+                👩‍⚕️ Nurse Demo
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- CREATE ACCOUNT FORM -->
+      <div id="sectionRegister" class="{% if tab != 'register' %}d-none{% endif %}">
+        <h2 class="h4 mb-1">Create Staff Account</h2>
+        <p class="text-muted small mb-4">Register a qualified staff profile to manage emergency patients.</p>
+
+        <form method="post" action="{{ url_for('staff_register') }}" id="registerForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf() }}">
+          
+          <div class="mb-3">
+            <label class="form-label" for="reg_name">Full Name &amp; Title</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-person-badge"></i></span>
+              <input class="form-control" id="reg_name" name="display_name" placeholder="e.g. Dr. Priya Sharma" required maxlength="80">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="reg_user">Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-at"></i></span>
+              <input class="form-control" id="reg_user" name="username" placeholder="e.g. priya.sharma" required maxlength="40">
+            </div>
+            <div class="form-text small">Use letters, numbers, and dots only.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label d-block">Staff Role</label>
+            <div class="row g-2">
+              <div class="col-6">
+                <input type="radio" class="btn-check" name="role" id="role_clinician" value="clinician" checked>
+                <label class="btn btn-outline-primary w-100 text-start p-2 h-100" for="role_clinician">
+                  <div class="fw-bold"><i class="bi bi-stethoscope me-1"></i> Clinician</div>
+                  <small class="text-muted" style="font-size:0.75rem">Can set clinical priority</small>
+                </label>
+              </div>
+              <div class="col-6">
+                <input type="radio" class="btn-check" name="role" id="role_nurse" value="nurse">
+                <label class="btn btn-outline-primary w-100 text-start p-2 h-100" for="role_nurse">
+                  <div class="fw-bold"><i class="bi bi-heart-pulse me-1"></i> Nurse</div>
+                  <small class="text-muted" style="font-size:0.75rem">Can update beds &amp; vitals</small>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="reg_pw">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-key"></i></span>
+              <input class="form-control" id="reg_pw" name="password" type="password" placeholder="At least 6 characters" required minlength="6">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" for="reg_cpw">Confirm Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-check2-circle"></i></span>
+              <input class="form-control" id="reg_cpw" name="confirm_password" type="password" placeholder="Repeat password" required minlength="6">
+            </div>
+          </div>
+
+          <button class="btn btn-primary w-100 btn-lg mb-3" type="submit">
+            <i class="bi bi-person-check-fill me-2"></i> Register &amp; Open Dashboard
+          </button>
+        </form>
+      </div>
+
+      <p class="mt-4 text-center">
+        <a href="{{ url_for('register_page') }}" class="text-decoration-none">
+          <i class="bi bi-arrow-left me-1"></i> Back to Patient Portal
+        </a>
+      </p>
+    </main>
+  </section>
+</div>
+
+<script>
+  (function() {
+    var tabLogin = document.getElementById('btnTabLogin');
+    var tabRegister = document.getElementById('btnTabRegister');
+    var secLogin = document.getElementById('sectionLogin');
+    var secRegister = document.getElementById('sectionRegister');
+
+    function showTab(tab) {
+      if (tab === 'register') {
+        secRegister.classList.remove('d-none');
+        secLogin.classList.add('d-none');
+        tabRegister.className = 'btn btn-sm flex-fill py-2 fw-bold btn-white shadow-sm text-navy';
+        tabLogin.className = 'btn btn-sm flex-fill py-2 fw-bold text-muted';
+      } else {
+        secLogin.classList.remove('d-none');
+        secRegister.classList.add('d-none');
+        tabLogin.className = 'btn btn-sm flex-fill py-2 fw-bold btn-white shadow-sm text-navy';
+        tabRegister.className = 'btn btn-sm flex-fill py-2 fw-bold text-muted';
+      }
+    }
+
+    if (tabLogin) tabLogin.addEventListener('click', function() { showTab('login'); });
+    if (tabRegister) tabRegister.addEventListener('click', function() { showTab('register'); });
+
+    // Show/hide password
+    var btnToggle = document.getElementById('btnToggleLoginPw');
+    var pwInput = document.getElementById('login_pw');
+    if (btnToggle && pwInput) {
+      btnToggle.addEventListener('click', function() {
+        var isPw = pwInput.type === 'password';
+        pwInput.type = isPw ? 'text' : 'password';
+        btnToggle.querySelector('i').className = isPw ? 'bi bi-eye-slash' : 'bi bi-eye';
+      });
+    }
+
+    // Demo fill buttons
+    document.querySelectorAll('.demo-fill-btn').forEach(function(b) {
+      b.addEventListener('click', function() {
+        document.getElementById('login_user').value = this.dataset.user;
+        document.getElementById('login_pw').value = this.dataset.pw;
+        showTab('login');
+      });
+    });
+  })();
+</script>
+{% endblock %}

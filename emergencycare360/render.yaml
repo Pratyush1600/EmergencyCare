@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: emergencycare360
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --workers 1 --threads 4 --timeout 60 --bind 0.0.0.0:$PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL        # TiDB Cloud: mysql://USER:PASSWORD@HOST:4000/DBNAME
+        sync: false
+      - key: STAFF_PASSWORD      # password for the demo staff accounts (dr.demo, nurse.demo)
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID
+        value: 21m00Tcm4TlvDq8ikWAM
+      - key: ELEVENLABS_MODEL_ID
+        value: eleven_multilingual_v2
+      - key: SEED_DEMO_PATIENTS
+        value: "true"

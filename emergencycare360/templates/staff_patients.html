@@ -1,0 +1,31 @@
+{% extends "staff_base.html" %}{% set active='patients' %}
+{% block title %}Patients · EmergencyCare 360{% endblock %}
+{% block page %}patients{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Patients</h1><p class="text-muted">Search, review and update patient records. Listed in arrival order.</p></div></div>
+<div class="ec-card p-0 overflow-hidden" data-role="{{ staff.role }}" id="listCard">
+  <div class="p-3 d-flex flex-wrap gap-2 border-bottom">
+    <div class="input-group" style="max-width:300px"><span class="input-group-text bg-white"><i class="bi bi-search"></i></span><input id="q" class="form-control" placeholder="Search name, ID or phone" aria-label="Search patients"></div>
+    <select id="fStatus" class="form-select w-auto" aria-label="Filter by status"><option value="">All statuses</option>{% for s in STATUSES %}<option value="{{ loop.index0 }}">{{ s }}</option>{% endfor %}</select>
+    <select id="fPri" class="form-select w-auto" aria-label="Filter by priority"><option value="">All priorities</option>{% for s in PRIORITIES %}<option>{{ s }}</option>{% endfor %}</select>
+    <button class="btn btn-soft ms-auto" id="scanBtn" type="button"><i class="bi bi-qr-code-scan me-1"></i>Scan QR</button>
+  </div>
+  <div class="table-responsive"><table class="table ec-table"><thead><tr><th class="ps-3">Patient</th><th>Priority</th><th>Status</th><th>Bed</th><th>Arrived</th><th class="pe-3">Info</th></tr></thead><tbody id="rows"></tbody></table></div>
+</div>
+
+<div class="offcanvas offcanvas-end detail-oc" tabindex="-1" id="detailOc" data-bs-backdrop="false" data-bs-scroll="true" aria-labelledby="dTitle">
+  <div class="offcanvas-header bg-white border-bottom"><h2 class="h5 m-0" id="dTitle">Patient record</h2><button class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button></div>
+  <div class="offcanvas-body" id="detail"></div>
+</div>
+
+<div class="modal fade" id="handoverModal" tabindex="-1" aria-labelledby="hoTitle" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+  <div class="modal-header"><h2 class="modal-title h5" id="hoTitle"><i class="bi bi-arrow-left-right me-2 text-primary"></i>Handover snapshot</h2><button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+  <div class="modal-body" id="handoverPrint"></div>
+  <div class="modal-footer"><button class="btn btn-soft" id="hoCopy"><i class="bi bi-clipboard me-1"></i>Copy text</button><button class="btn btn-primary" id="hoPrint"><i class="bi bi-printer me-1"></i>Print</button></div>
+</div></div></div>
+
+<div class="modal fade" id="scanModal" tabindex="-1" aria-labelledby="scTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+  <div class="modal-header"><h2 class="modal-title h5" id="scTitle">Scan patient QR</h2><button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+  <div class="modal-body"><video id="scanVideo" class="w-100 rounded bg-dark" playsinline muted style="aspect-ratio:4/3;object-fit:cover"></video><p class="small text-muted mt-2 mb-0" id="scanMsg">Point the camera at the patient's QR code.</p></div>
+</div></div></div>
+{% endblock %}

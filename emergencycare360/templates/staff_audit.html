@@ -1,0 +1,14 @@
+{% extends "staff_base.html" %}{% set active='audit' %}
+{% block title %}Audit log · EmergencyCare 360{% endblock %}
+{% block page %}audit{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Audit log</h1><p class="text-muted">Who did what, and when. Showing the latest 300 entries.</p></div></div>
+<div class="ec-card p-0 overflow-hidden">
+  <div class="p-3 d-flex flex-wrap gap-2 border-bottom">
+    <div class="input-group" style="max-width:300px"><span class="input-group-text bg-white"><i class="bi bi-search"></i></span><input id="aq" class="form-control" placeholder="Search patient ID, staff, detail" aria-label="Search audit log"></div>
+    <select id="aAct" class="form-select w-auto" aria-label="Filter by action"><option value="">All actions</option>
+      {% for a,l in [('register','Registrations'),('update','Updates'),('view','Record views'),('handover','Handovers'),('report','Report access'),('bed','Beds'),('resource','Resources'),('patient_update','Patient edits'),('login','Sign-ins'),('login_failed','Failed sign-ins'),('logout','Sign-outs')] %}<option value="{{ a }}">{{ l }}</option>{% endfor %}</select>
+  </div>
+  <div class="table-responsive"><table class="table ec-table"><thead><tr><th class="ps-3">Time</th><th>Actor</th><th>Action</th><th>Patient</th><th class="pe-3">Detail</th></tr></thead><tbody id="aRows"></tbody></table></div>
+</div>
+{% endblock %}

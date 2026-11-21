@@ -1,0 +1,72 @@
+{% extends "patient_base.html" %}
+{% block title %}Emergency registration · EmergencyCare 360{% endblock %}
+{% block page %}register{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4 order-lg-2">
+    <aside class="hero-panel d-flex flex-column">
+      <span class="eyebrow" style="color:#7fd6d7" data-i18n="panel_eyebrow">Patient portal</span>
+      <h1 class="mt-2 mb-4" data-i18n="panel_h">Clearer, faster emergency care</h1>
+      <ul class="list-unstyled mb-4">
+        <li><i class="bi bi-lightning-charge-fill"></i><span data-i18n="p1">Register in about two minutes, before you reach the desk.</span></li>
+        <li><i class="bi bi-volume-up-fill"></i><span data-i18n="p2">Live status with voice announcements in Hindi and English.</span></li>
+        <li><i class="bi bi-qr-code"></i><span data-i18n="p3">A QR code that helps staff find your record quickly.</span></li>
+        <li><i class="bi bi-shield-lock-fill"></i><span data-i18n="p4">Your family sees your status only if you give consent.</span></li>
+        <li><i class="bi bi-person-check-fill"></i><span data-i18n="p5">Doctors and nurses decide priority. This tool only organises information.</span></li>
+      </ul>
+      <div class="p-3 mb-3 rounded-3" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25);">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <i class="bi bi-mic-fill text-warning fs-5"></i>
+          <strong class="text-white">AI Voice Assistant Ready</strong>
+        </div>
+        <p class="small text-white-50 mb-2">Speak directly with our ElevenLabs voice agent for guidance, registration assistance, and questions.</p>
+        <button type="button" class="btn btn-light btn-sm fw-bold w-100 trigger-elevenlabs-btn mb-2">
+          <i class="bi bi-telephone-fill me-1 text-primary"></i> Speak with AI Assistant
+        </button>
+        <div class="d-flex flex-wrap gap-1 mt-2">
+          <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 small quick-prompt-btn" style="font-size:0.75rem" data-prompt="What information do I need to register?">📋 Registration info</button>
+          <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 small quick-prompt-btn" style="font-size:0.75rem" data-prompt="How does clinical priority work?">⚡ Priority guide</button>
+          <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 small quick-prompt-btn" style="font-size:0.75rem" data-prompt="What should I do if this is life-threatening?">🚨 Critical emergency</button>
+        </div>
+      </div>
+      <div class="sos mt-auto"><i class="bi bi-exclamation-triangle-fill me-1"></i><span data-i18n="sos">In immediate danger? Tell the nearest staff member or call 112.</span></div>
+    </aside>
+  </div>
+  <div class="col-lg-8 order-lg-1">
+    <div class="ec-card p-md-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+        <h1 class="h3 mb-0" data-i18n="reg_title">Emergency registration</h1>
+        <button type="button" class="btn btn-soft btn-sm d-inline-flex align-items-center gap-1" id="btnSpeakForm" title="Speak form instructions in human voice">
+          <i class="bi bi-volume-up-fill text-teal"></i> <span data-i18n="read_aloud">Read form aloud</span>
+        </button>
+      </div>
+      <p class="text-muted mb-4" data-i18n="reg_sub">Tell us what is happening. Hospital staff will review your details and update your status here.</p>
+      <form id="regForm" novalidate>
+        <div class="form-section"><span class="icon-chip"><i class="bi bi-person"></i></span><span data-i18n="sec_you">About you</span></div>
+        <div class="row g-3">
+          <div class="col-sm-8"><label class="form-label" for="f-name" data-i18n="name">Full name</label><input class="form-control" id="f-name" name="name" autocomplete="off" maxlength="80" required aria-describedby="e-name"><div class="invalid-feedback" id="e-name"></div></div>
+          <div class="col-sm-4"><label class="form-label" for="f-age" data-i18n="age">Age</label><input class="form-control" id="f-age" name="age" type="number" inputmode="numeric" min="0" max="120" required aria-describedby="e-age"><div class="invalid-feedback" id="e-age"></div></div>
+          <div class="col-sm-6"><label class="form-label" for="f-phone" data-i18n="phone">Phone number</label><input class="form-control" id="f-phone" name="phone" inputmode="tel" autocomplete="tel" maxlength="20" required aria-describedby="e-phone"><div class="invalid-feedback" id="e-phone"></div></div>
+          <div class="col-sm-6"><label class="form-label" for="f-kin" data-i18n="kin">Family contact number</label><input class="form-control" id="f-kin" name="kin_phone" inputmode="tel" maxlength="20" aria-describedby="e-kin_phone kin-help"><div class="form-text" id="kin-help" data-i18n="kin_help">Optional. Needed only if you want your family to see your status.</div><div class="invalid-feedback" id="e-kin_phone"></div></div>
+        </div>
+        <div class="form-section"><span class="icon-chip"><i class="bi bi-thermometer-half"></i></span><span data-i18n="sec_sym">Symptoms</span></div>
+        <label class="form-label" for="f-sym" data-i18n="sym">What is wrong, and when did it start?</label>
+        <textarea class="form-control" id="f-sym" name="symptoms" rows="3" maxlength="600" required aria-describedby="e-symptoms"></textarea><div class="invalid-feedback" id="e-symptoms"></div>
+        <div class="form-section"><span class="icon-chip"><i class="bi bi-journal-medical"></i></span><span data-i18n="sec_bg">Medical background</span></div>
+        <div class="row g-3">
+          <div class="col-sm-6"><label class="form-label" for="f-hist" data-i18n="hist">Medical history</label><input class="form-control" id="f-hist" name="history" maxlength="300" data-i18n-ph="hist_ph" placeholder="Conditions, medicines, or “None”"></div>
+          <div class="col-sm-6"><label class="form-label" for="f-all" data-i18n="all">Allergies</label><input class="form-control" id="f-all" name="allergies" maxlength="300" data-i18n-ph="all_ph" placeholder="e.g. Penicillin, or “None”"></div>
+          <div class="col-12"><label class="form-label" for="f-rep" data-i18n="rep">Previous reports (optional)</label><input class="form-control" id="f-rep" name="report" type="file" accept=".pdf,.jpg,.jpeg,.png" aria-describedby="e-report rep-help"><div class="form-text" id="rep-help" data-i18n="rep_help">PDF, JPG or PNG, up to 3 MB.</div><div class="invalid-feedback" id="e-report"></div></div>
+        </div>
+        <div class="form-check form-switch mt-4 d-flex gap-2 align-items-start ps-0">
+          <input class="form-check-input ms-0 mt-1 flex-none" type="checkbox" role="switch" id="f-consent"><label class="form-check-label" for="f-consent" data-i18n="cons">Let my family contact see my status. Only the status is shared, never medical details.</label>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-3 mt-4">
+          <button class="btn btn-primary btn-lg px-4" id="go" type="submit"><i class="bi bi-send-check me-2"></i><span data-i18n="go">Submit registration</span></button>
+          <a href="{{ url_for('track_lookup_page') }}" class="fw-semibold" data-i18n="have_id">Already registered? Check your status</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

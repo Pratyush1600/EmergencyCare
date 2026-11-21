@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}EmergencyCare 360{% endblock %}</title>
+<meta name="csrf" content="{{ csrf() }}">
+<meta name="theme-color" content="#142D4E">
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='vendor/icons/bootstrap-icons.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
+</head>
+<body data-page="{% block page %}{% endblock %}">
+{% block body %}{% endblock %}
+<script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/core.js') }}"></script>
+{% block scripts %}{% endblock %}
+{% if config.ELEVENLABS_AGENT_ID %}
+<script>
+  // Robust AudioWorklet loading: if data: URI is restricted or fails, fallback to self-hosted files
+  (function() {
+    if (typeof window !== 'undefined' && window.AudioWorklet && window.AudioWorklet.prototype.addModule) {
+      const _origAddModule = window.AudioWorklet.prototype.addModule;
+      window.AudioWorklet.prototype.addModule = async function(moduleURL, options) {
+        try {
+          return await _origAddModule.call(this, moduleURL, options);
+        } catch (err) {
+          console.warn('[ElevenLabs] Worklet data: load encountered an issue; falling back to self-hosted worklet:', err);
+          if (typeof moduleURL === 'string') {
+            if (moduleURL.includes('rawAudioProcessor') || moduleURL.length > 3000) {
+              return await _origAddModule.call(this, '{{ url_for("static", filename="rawAudioProcessor.js") }}', options);
+            } else if (moduleURL.includes('audioConcatProcessor') || moduleURL.length > 2000) {
+              return await _origAddModule.call(this, '{{ url_for("static", filename="audioConcatProcessor.js") }}', options);
+            }
+          }
+          throw err;
+        }
+      };
+    }
+  })();
+</script>
+<elevenlabs-convai agent-id="{{ config.ELEVENLABS_AGENT_ID }}"></elevenlabs-convai>
+<script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+
+<!-- Interactive AI Voice Call Assistant Modal -->
+<div class="modal fade" id="voiceAssistantModal" tabindex="-1" aria-labelledby="voiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-navy text-white py-3 border-0">
+        <div class="d-flex align-items-center gap-2">
+          <span class="icon-chip bg-white text-navy"><i class="bi bi-robot"></i></span>
+          <div>
+            <h5 class="modal-title h6 mb-0 text-white" id="voiceModalLabel">EmergencyCare AI Health & Voice Assistant</h5>
+            <small class="text-white-50"><i class="bi bi-broadcast text-success me-1"></i>ElevenLabs Voice Explaining Engine</small>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 bg-light">
+        <div class="voice-call-card mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-success text-white px-2 py-1"><i class="bi bi-circle-fill fs-6 me-1"></i> Live Voice Ready</span>
+            <span class="small text-white-50" id="voiceLangIndicator">English / हिन्दी</span>
+          </div>
+          <button type="button" class="voice-pulse-btn" id="voiceMicBtn" title="Click to speak your question">
+            <i class="bi bi-mic-fill" id="voiceMicIcon"></i>
+          </button>
+          <div class="wave-bars" id="voiceWaveBars">
+            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+          </div>
+          <p class="mb-0 fw-semibold" id="voiceCallStatus">Tap the microphone to speak, or ask below</p>
+          <p class="small text-white-50 mt-1 mb-0" id="voiceSubStatus">Ask any health issue or cure. I will explain aloud in human voice.</p>
+        </div>
+
+        <!-- Conversation display -->
+        <div id="voiceChatArea" style="max-height: 220px; overflow-y: auto;" class="mb-3 px-1">
+          <div class="qa-bubble ai">
+            <b><i class="bi bi-robot text-teal me-1"></i> Assistant:</b> Hello! I am your EmergencyCare AI Health & Voice Assistant. Ask me about any health problem, symptoms, or home cures (e.g. fever, headache, stomach pain, acidity, cough, cuts, burns, sprains) or hospital triage, and I will explain the cure in human voice.
+          </div>
+        </div>
+
+        <!-- Quick Questions Chips -->
+        <div class="mb-3">
+          <small class="text-muted fw-bold d-block mb-2">🩺 Ask health issues & cures, or hospital care:</small>
+          <div class="d-flex flex-wrap gap-1">
+            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill modal-quick-q" data-q="What is the cure for fever and body temperature?">🌡️ Fever Cure</button>
+            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill modal-quick-q" data-q="Suggest cure and remedy for severe headache">💆 Headache Relief</button>
+            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill modal-quick-q" data-q="What to do for stomach pain and acidity?">🍵 Stomach & Acidity</button>
+            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill modal-quick-q" data-q="First aid and cure for minor burns">🔥 Burn First Aid</button>
+            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill modal-quick-q" data-q="Remedy and cure for cough and sore throat">🌿 Cough & Throat</button>
+            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill modal-quick-q" data-q="Treatment and cure for ankle sprain and swelling">🦶 Sprain RICE Cure</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill modal-quick-q" data-q="How does priority triage work?">⚡ Priority Triage</button>
+            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill modal-quick-q" data-q="Severe chest pain or shortness of breath">🚨 Critical Symptoms</button>
+          </div>
+        </div>
+
+        <!-- Text input question bar -->
+        <form id="voiceAskForm" class="d-flex gap-2">
+          <input type="text" class="form-control rounded-pill px-3" id="voiceAskInput" placeholder="Ask any health issue, symptom, cure, or question..." autocomplete="off">
+          <button type="submit" class="btn btn-primary rounded-pill px-3" id="voiceSendBtn">
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </form>
+      </div>
+      <div class="modal-footer bg-white py-2 px-4 d-flex justify-content-between align-items-center">
+        <small class="text-muted"><i class="bi bi-info-circle me-1"></i>AI suggestions provide first-aid advice. Hospital staff diagnose and treat emergencies.</small>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="btnSwitchToElevenLabsWidget">
+          <i class="bi bi-telephone-fill me-1"></i> ElevenLabs Direct Agent
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.openElevenLabsAgent = function() {
+    try {
+      if (window.AudioContext || window.webkitAudioContext) {
+        const ctx = window._elAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        window._elAudioCtx = ctx;
+        if (ctx.state === 'suspended') ctx.resume();
+      }
+    } catch (e) {}
+
+    var widget = document.querySelector('elevenlabs-convai');
+    if (!widget) return;
+    if (widget.shadowRoot) {
+      var btn = widget.shadowRoot.querySelector('button');
+      if (btn) { btn.click(); return; }
+    }
+    widget.click();
+  };
+
+  (function() {
+    var modalEl = document.getElementById('voiceAssistantModal');
+    var voiceModal = null;
+    function getModal() {
+      if (!voiceModal && window.bootstrap && modalEl) {
+        voiceModal = new bootstrap.Modal(modalEl);
+      }
+      return voiceModal;
+    }
+
+    var micBtn = document.getElementById('voiceMicBtn');
+    var micIcon = document.getElementById('voiceMicIcon');
+    var waveBars = document.getElementById('voiceWaveBars');
+    var callStatus = document.getElementById('voiceCallStatus');
+    var subStatus = document.getElementById('voiceSubStatus');
+    var chatArea = document.getElementById('voiceChatArea');
+    var askForm = document.getElementById('voiceAskForm');
+    var askInput = document.getElementById('voiceAskInput');
+    var currentAudio = null;
+    var isListening = false;
+    var recognition = null;
+
+    // Check Speech Recognition support
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = function() {
+        isListening = true;
+        micBtn.classList.add('listening');
+        micIcon.className = 'bi bi-soundwave';
+        waveBars.classList.add('active');
+        callStatus.textContent = 'Listening to your voice... Speak now';
+        subStatus.textContent = 'I will answer and explain in human voice.';
+      };
+
+      recognition.onresult = function(event) {
+        var transcript = event.results[0][0].transcript;
+        askInput.value = transcript;
+        handleAsk(transcript);
+      };
+
+      recognition.onerror = function(event) {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        micIcon.className = 'bi bi-mic-fill';
+        waveBars.classList.remove('active');
+        callStatus.textContent = 'Microphone paused. Tap to try again or type below.';
+      };
+
+      recognition.onend = function() {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        micIcon.className = 'bi bi-mic-fill';
+        if (!currentAudio) {
+          waveBars.classList.remove('active');
+        }
+      };
+    }
+
+    if (micBtn) {
+      micBtn.addEventListener('click', function() {
+        // Stop current audio if speaking
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio = null;
+          micBtn.classList.remove('speaking');
+          waveBars.classList.remove('active');
+        }
+        if ("speechSynthesis" in window) speechSynthesis.cancel();
+
+        if (isListening && recognition) {
+          recognition.stop();
+          return;
+        }
+
+        if (recognition) {
+          var curLang = localStorage.getItem('ec_lang') === 'hi' ? 'hi-IN' : 'en-US';
+          recognition.lang = curLang;
+          try {
+            recognition.start();
+          } catch (e) {
+            console.warn("Recognition already started or permission issue:", e);
+          }
+        } else {
+          askInput.focus();
+          callStatus.textContent = "Please type your question below:";
+        }
+      });
+    }
+
+    async function handleAsk(query) {
+      if (!query || !query.trim()) return;
+      var curLang = localStorage.getItem('ec_lang') === 'hi' ? 'hi' : 'en';
+      var token = localStorage.getItem('ec_token') || (document.getElementById('app') ? document.getElementById('app').dataset.token : null);
+
+      // Append user bubble
+      var userDiv = document.createElement('div');
+      userDiv.className = 'qa-bubble user';
+      userDiv.innerHTML = '<b><i class="bi bi-person-fill me-1"></i> You:</b> ' + (query.replace(/</g, "&lt;"));
+      chatArea.appendChild(userDiv);
+      chatArea.scrollTop = chatArea.scrollHeight;
+
+      callStatus.textContent = 'Thinking and preparing human explanation...';
+      subStatus.textContent = 'Fetching answer and ElevenLabs voice...';
+      waveBars.classList.add('active');
+
+      try {
+        var csrfMeta = document.querySelector('meta[name="csrf"]');
+        var resp = await fetch('/api/ai/ask', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfMeta ? csrfMeta.content : ''
+          },
+          body: JSON.stringify({ query: query, lang: curLang, token: token })
+        });
+        var data = await resp.json();
+        var answer = data.answer || "I am here to assist you with emergency registration, triage, and hospital care.";
+
+        // Append AI bubble
+        var aiDiv = document.createElement('div');
+        aiDiv.className = 'qa-bubble ai';
+        aiDiv.innerHTML = '<b><i class="bi bi-robot text-teal me-1"></i> Assistant:</b> ' + answer;
+        chatArea.appendChild(aiDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        // Speak the answer in human voice
+        speakExplanation(answer, data.audio_url, curLang);
+      } catch (err) {
+        console.error("AI Assistant error:", err);
+        callStatus.textContent = "Error answering question. Tap mic to retry.";
+        waveBars.classList.remove('active');
+      }
+    }
+
+    async function speakExplanation(text, audioUrl, curLang) {
+      callStatus.textContent = 'Explaining in human voice...';
+      subStatus.textContent = 'Listen to the spoken answer below.';
+      micBtn.classList.add('speaking');
+      waveBars.classList.add('active');
+
+      var played = false;
+      if (audioUrl) {
+        try {
+          var res = await fetch(audioUrl);
+          var cType = res.headers.get("Content-Type") || "";
+          if (res.ok && cType.includes("audio")) {
+            var blob = await res.blob();
+            var blobUrl = URL.createObjectURL(blob);
+            currentAudio = new Audio(blobUrl);
+            currentAudio.onended = function() {
+              URL.revokeObjectURL(blobUrl);
+              currentAudio = null;
+              finishSpeaking();
+            };
+            await currentAudio.play();
+            played = true;
+          }
+        } catch (e) {
+          console.warn("Direct ElevenLabs audio stream fallback:", e);
+        }
+      }
+
+      if (!played && "speechSynthesis" in window && text) {
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = curLang === 'hi' ? 'hi-IN' : 'en-IN';
+        u.rate = 0.95;
+        u.pitch = 1.0;
+        u.onend = finishSpeaking;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }
+    }
+
+    function finishSpeaking() {
+      micBtn.classList.remove('speaking');
+      waveBars.classList.remove('active');
+      callStatus.textContent = 'Tap the microphone to speak, or ask below';
+      subStatus.textContent = 'I will explain the answer aloud in human voice.';
+    }
+
+    if (askForm) {
+      askForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var val = askInput.value.trim();
+        if (val) {
+          askInput.value = '';
+          handleAsk(val);
+        }
+      });
+    }
+
+    document.addEventListener('click', function(e) {
+      var qBtn = e.target.closest('.modal-quick-q');
+      if (qBtn) {
+        var q = qBtn.dataset.q;
+        handleAsk(q);
+        return;
+      }
+
+      var switchBtn = e.target.closest('#btnSwitchToElevenLabsWidget');
+      if (switchBtn) {
+        var m = getModal();
+        if (m) m.hide();
+        window.openElevenLabsAgent();
+        return;
+      }
+
+      if (e.target.closest('.trigger-elevenlabs-btn, #btnTalkAi')) {
+        e.preventDefault();
+        var m = getModal();
+        if (m) {
+          m.show();
+        } else {
+          window.openElevenLabsAgent();
+        }
+      }
+    });
+  })();
+</script>
+{% endif %}
+</body>
+</html>

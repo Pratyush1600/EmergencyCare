@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block body %}
+<a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
+<header class="pt-nav">
+  <nav class="navbar navbar-expand-md py-2" aria-label="Main">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('register_page') }}"><span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span><span>EmergencyCare 360</span></a>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#ptNav" aria-controls="ptNav" aria-expanded="false" aria-label="Menu"><i class="bi bi-list fs-2"></i></button>
+      <div class="collapse navbar-collapse" id="ptNav">
+        <ul class="navbar-nav me-auto ms-md-3 gap-md-1">
+          <li class="nav-item"><a class="nav-link {% if request.endpoint=='register_page' %}active{% endif %}" href="{{ url_for('register_page') }}"><i class="bi bi-clipboard2-pulse me-1"></i><span data-i18n="nav_register">Emergency registration</span></a></li>
+          <li class="nav-item"><a class="nav-link {% if request.endpoint in ('track_lookup_page','track_page') %}active{% endif %}" id="navStatus" href="{{ url_for('track_lookup_page') }}"><i class="bi bi-activity me-1"></i><span data-i18n="nav_status">My status</span></a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 py-2 py-md-0">
+          <button type="button" class="btn btn-soft btn-sm d-inline-flex align-items-center gap-1 trigger-elevenlabs-btn" id="btnTalkAi" title="Talk to AI Voice Assistant">
+            <i class="bi bi-mic-fill text-teal"></i>
+            <span>AI Voice Agent</span>
+          </button>
+          <div class="lang-toggle" role="group" aria-label="Language"><button type="button" data-lang="en" class="active" aria-pressed="true">English</button><button type="button" data-lang="hi" aria-pressed="false" lang="hi">हिन्दी</button></div>
+          {% if staff %}
+          <a class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1" href="{{ url_for('staff_overview') }}" title="Open Hospital Staff Dashboard">
+            <i class="bi bi-speedometer2 me-1"></i>
+            <span>Staff Dashboard</span>
+          </a>
+          {% else %}
+          <a class="btn btn-outline-primary btn-sm" href="{{ url_for('staff_login') }}"><i class="bi bi-person-badge me-1"></i><span data-i18n="nav_staff">Staff login</span></a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<main id="main" class="container py-4 py-md-5">{% block content %}{% endblock %}</main>
+<footer class="container pb-4 safe-note text-center"><span data-i18n="footer">All patients shown in this demo are fictional. The system only organises information; clinical priority is always set by hospital staff.</span></footer>
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/patient.js') }}"></script>{% endblock %}

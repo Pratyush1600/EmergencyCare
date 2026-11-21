@@ -1,0 +1,20 @@
+{% extends "patient_base.html" %}
+{% block title %}My status · EmergencyCare 360{% endblock %}
+{% block page %}lookup{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-8 col-lg-5">
+  <div class="ec-card p-md-4">
+    <span class="icon-chip mb-3"><i class="bi bi-search-heart"></i></span>
+    <h1 class="h3" data-i18n="look_title">Check your status</h1>
+    <p class="text-muted" data-i18n="look_sub">Enter the ID you received at registration and the phone number you used.</p>
+    <form id="lookForm" novalidate>
+      <label class="form-label" for="l-code" data-i18n="look_code">Patient ID</label>
+      <input class="form-control mb-3" id="l-code" placeholder="EC-1001" autocomplete="off" autocapitalize="characters" required>
+      <label class="form-label" for="l-phone" data-i18n="phone">Phone number</label>
+      <input class="form-control mb-3" id="l-phone" inputmode="tel" required>
+      <div class="text-danger small mb-2" id="l-err" role="alert"></div>
+      <button class="btn btn-primary w-100" type="submit"><span data-i18n="look_go">Show my status</span></button>
+    </form>
+  </div>
+</div></div>
+{% endblock %}

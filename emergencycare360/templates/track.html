@@ -1,0 +1,8 @@
+{% extends "patient_base.html" %}
+{% block title %}My status · EmergencyCare 360{% endblock %}
+{% block page %}track{% endblock %}
+{% block content %}
+<div id="app" data-token="{{ token }}">
+  <div class="skeleton mb-3" style="height:220px"></div><div class="skeleton" style="height:260px"></div>
+</div>
+{% endblock %}

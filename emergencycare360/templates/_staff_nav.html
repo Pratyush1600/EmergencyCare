@@ -1,0 +1,10 @@
+<a class="side-link {% if active=='overview' %}active{% endif %}" href="{{ url_for('staff_overview') }}"><i class="bi bi-grid-1x2"></i>Overview</a>
+<a class="side-link {% if active=='patients' %}active{% endif %}" href="{{ url_for('staff_patients') }}"><i class="bi bi-people"></i>Patients</a>
+<a class="side-link {% if active=='resources' %}active{% endif %}" href="{{ url_for('staff_resources') }}"><i class="bi bi-hospital"></i>Beds &amp; resources</a>
+<a class="side-link {% if active=='audit' %}active{% endif %}" href="{{ url_for('staff_audit') }}"><i class="bi bi-journal-check"></i>Audit log</a>
+<a class="side-link" href="{{ url_for('register_page') }}" style="opacity:0.8"><i class="bi bi-arrow-left-circle"></i>Patient Portal</a>
+<div class="side-user">
+  <div class="d-flex align-items-center gap-2 mb-2"><span class="icon-chip" style="background:rgba(255,255,255,.12);color:#fff"><i class="bi bi-person-badge"></i></span>
+    <div class="lh-sm"><div class="text-white fw-semibold">{{ staff.display_name }}</div><small class="text-capitalize" style="color:#9fb5cf">{{ staff.role }}</small></div></div>
+  <form method="post" action="{{ url_for('staff_logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf() }}"><button class="btn btn-outline-light btn-sm w-100" type="submit"><i class="bi bi-box-arrow-right me-1"></i>Sign out</button></form>
+</div>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block body %}
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="topbar-m">
+  <button class="btn btn-sm text-white border-0 fs-4 p-0" data-bs-toggle="offcanvas" data-bs-target="#navOc" aria-label="Open menu"><i class="bi bi-list"></i></button>
+  <span class="fw-bold">EmergencyCare 360</span>
+</div>
+<div class="offcanvas offcanvas-start nav-oc text-white" tabindex="-1" id="navOc" aria-label="Menu">
+  <div class="offcanvas-body d-flex flex-column gap-1">{% include "_staff_nav.html" %}</div>
+</div>
+<div class="staff-shell">
+  <aside class="sidebar" aria-label="Staff navigation">
+    <div class="brand"><span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span><div>EmergencyCare 360<small>Hospital staff</small></div></div>
+    {% include "_staff_nav.html" %}
+  </aside>
+  <main id="main" class="staff-main">{% block content %}{% endblock %}</main>
+</div>
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+{% endblock %}
+{% block scripts %}{% block libs %}{% endblock %}<script src="{{ url_for('static', filename='js/staff.js') }}"></script>{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "staff_base.html" %}{% set active='overview' %}
+{% block title %}Overview · EmergencyCare 360{% endblock %}
+{% block page %}overview{% endblock %}
+{% block libs %}<script src="{{ url_for('static', filename='vendor/chart/chart.umd.min.js') }}"></script>{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Emergency overview</h1><p class="text-muted">Live view of patients, beds and resources. <span id="updated" class="sub"></span></p></div>
+  <a class="btn btn-primary" href="{{ url_for('staff_patients') }}"><i class="bi bi-people me-1"></i>Manage patients</a></div>
+<div class="row g-3 mb-3" id="stats"><div class="col-12"><div class="skeleton" style="min-height:90px"></div></div></div>
+<div class="row g-3 mb-3">
+  <div class="col-lg-7"><div class="ec-card h-100"><h2>Patients by status</h2><div style="height:260px"><canvas id="chStatus" role="img" aria-label="Bar chart of patients by status"></canvas></div></div></div>
+  <div class="col-lg-5"><div class="ec-card h-100"><h2>Priority (set by staff)</h2><div style="height:260px"><canvas id="chPri" role="img" aria-label="Doughnut chart of active patients by staff-assigned priority"></canvas></div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7"><div class="ec-card h-100"><h2>Needs attention</h2><div id="attention"></div></div></div>
+  <div class="col-lg-5"><div class="ec-card h-100"><div class="d-flex justify-content-between"><h2>Beds &amp; resources</h2><a href="{{ url_for('staff_resources') }}" class="small fw-semibold">Manage</a></div><div id="capacity"></div></div></div>
+</div>
+{% endblock %}
